@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Pro AI</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .aviator-panel {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, #0f172a 0%, #020617 100%);
+            border: 3px solid #38bdf8;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .brand {
+            font-size: 12px;
+            font-weight: 800;
+            color: #38bdf8;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        .status {
+            font-size: 11px;
+            color: #facc15;
+            margin-bottom: 8px;
+            background: rgba(250, 204, 21, 0.1);
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+        .multiplier {
+            font-size: 42px;
+            font-weight: 900;
+            color: #4ade80;
+            margin: 5px 0;
+            text-shadow: 0 0 15px rgba(74, 222, 128, 0.7);
+        }
+        .label {
+            font-size: 10px;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+        .btn-predict { background: #38bdf8; color: #020617; }
+        .btn-hide { background: #ef4444; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="aviator-panel">
+        <div class="brand">Aviator AI Radar</div>
+        <div class="status" id="statusText">SCANNING FLIGHT...</div>
+        
+        <div class="multiplier" id="multiplierText">1.00x</div>
+        <div class="label">ESTIMATED SAFE EXIT</div>
+
+        <div class="btn-row">
+            <button class="btn-predict" onclick="generatePrediction()">REFRESH</button>
+            <button class="btn-hide" onclick="minimizeApp()">HIDE</button>
+        </div>
+    </div>
+
+    <script>
+        function generatePrediction() {
+            document.getElementById("statusText").innerText = "ANALYZING ALGORITHM...";
+            document.getElementById("multiplierText").innerText = "...";
+            
+            setTimeout(() => {
+                // Random dynamic multiplier generation for fresh simulation
+                const randomMultiplier = (Math.random() * (4.50 - 1.20) + 1.20).toFixed(2) + "x";
+                document.getElementById("multiplierText").innerText = randomMultiplier;
+                document.getElementById("statusText").innerText = "SIGNAL LOCKED 🟢";
+            }, 800);
+        }
+
+        // Initial call
+        generatePrediction();
+        // Auto refresh every 10 seconds
+        setInterval(generatePrediction, 10000);
+
+        function minimizeApp() {
+            if (window.Android && window.Android.minimizePanel) {
+                window.Android.minimizePanel();
+            }
+        }
+    </script>
+</body>
+</html>
