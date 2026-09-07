@@ -44,14 +44,22 @@ class FloatingService : Service() {
             }
             container.addView(webView)
 
+            // Floating Bubble when minimized - clicking it restores the panel
             bubbleView = TextView(this).apply {
                 text = "✈️"
                 setTextColor(Color.WHITE)
-                textSize = 28f
+                textSize = 26f
                 gravity = Gravity.CENTER
-                setBackgroundColor(Color.parseColor("#cc020617"))
-                setPadding(24, 24, 24, 24)
+                setBackgroundColor(Color.parseColor("#e60f172a"))
+                setPadding(28, 28, 28, 28)
                 visibility = View.GONE
+                
+                setOnClickListener {
+                    try {
+                        bubbleView.visibility = View.GONE
+                        container.visibility = View.VISIBLE
+                    } catch (e: Exception) {}
+                }
             }
 
             val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
