@@ -1,132 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator AI Pro</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
+        body { 
+            background: transparent; 
+            color: #00ffcc; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
         }
-        .radar-panel {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.95));
-            border: 3px solid transparent;
+
+        .circle-panel {
+            width: 250px;
+            height: 250px;
+            background: rgba(5, 10, 20, 0.96);
             border-radius: 50%;
-            background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.95)), linear-gradient(135deg, #00ffcc, #ff00ff, #3b82f6);
+            border: 3px solid transparent;
+            background-image: linear-gradient(rgba(5, 10, 20, 0.96), rgba(5, 10, 20, 0.96)), linear-gradient(135deg, #00ffcc, #ff00ff, #3b82f6);
             background-origin: border-box;
             background-clip: content-box, border-box;
-            box-shadow: 0 0 35px rgba(0, 255, 204, 0.5), inset 0 0 20px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.6), inset 0 0 20px rgba(59, 130, 246, 0.4);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 30px;
+            padding: 20px;
             box-sizing: border-box;
             position: relative;
+            animation: pulseGlow 4s ease-in-out infinite alternate;
         }
-        .header {
-            font-size: 13px;
-            font-weight: 800;
-            color: #00ffcc;
-            letter-spacing: 2px;
-            margin-bottom: 2px;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.7);
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 204, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.3); }
+            100% { box-shadow: 0 0 35px rgba(255, 0, 255, 0.7), inset 0 0 20px rgba(0, 255, 204, 0.5); }
         }
-        .status {
-            font-size: 10px;
-            color: #facc15;
-            margin-bottom: 6px;
-            background: rgba(250, 204, 21, 0.15);
-            padding: 2px 12px;
-            border-radius: 12px;
+
+        .header-tag { 
+            font-size: 9px; 
+            font-weight: 800; 
+            background: rgba(0, 255, 204, 0.15);
+            color: #00ffcc; 
+            border: 1px solid #00ffcc;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
             letter-spacing: 1px;
         }
-        .multiplier {
-            font-size: 44px;
+        
+        .sub-title {
+            font-size: 8px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .result-box {
+            font-size: 28px;
             font-weight: 900;
             color: #ff00ff;
+            text-shadow: 0 0 12px rgba(255, 0, 255, 0.8);
             margin: 4px 0;
-            text-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+            letter-spacing: 1px;
         }
-        .label {
-            font-size: 10px;
-            color: #94a3b8;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-            text-transform: uppercase;
+
+        .status-box {
+            font-size: 7.5px;
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.1);
+            border: 1px dashed #facc15;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
         }
-        .btn-row {
+
+        .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 6px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 6px;
         }
-        button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
+
+        button { 
+            border: none; 
+            padding: 4px 10px; 
+            font-weight: bold; 
+            font-size: 9px; 
+            border-radius: 6px; 
             cursor: pointer;
-            font-size: 11px;
-            letter-spacing: 0.5px;
+            pointer-events: auto;
             transition: 0.2s;
         }
-        .btn-sync { background: #00ffcc; color: #000; box-shadow: 0 0 10px rgba(0,255,204,0.4); }
-        .btn-hide { background: #ef4444; color: #fff; box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+        
+        .refresh-btn { background: #00ffcc; color: #000; box-shadow: 0 0 8px rgba(0,255,204,0.5); }
+        .hide-btn { background: #ffaa00; color: #000; }
+        .close-btn { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="radar-panel">
-        <div class="header">AVIATOR AI PRO</div>
-        <div class="status" id="statusText">SYSTEM SECURED 🟢</div>
+    <div class="circle-panel">
+        <div class="header-tag">AVIATOR AI PRO</div>
+        <div class="sub-title">RADAR: <span id="radar-status" style="color:#00ffcc;">SCANNING</span></div>
         
-        <div class="multiplier" id="multiplierText">2.45x</div>
-        <div class="label">PREDICTED TARGET</div>
+        <div class="result-box" id="prediction">1.00x</div>
+        <div class="status-box" id="analytics-status">AI Model: Active</div>
 
-        <div class="btn-row">
-            <button class="btn-sync" onclick="forceRefresh()">REFRESH</button>
-            <button class="btn-hide" onclick="minimizeApp()">HIDE</button>
+        <div class="btn-group">
+            <button class="refresh-btn" onclick="triggerRefresh()">REFRESH</button>
+            <button class="hide-btn" onclick="Android.minimizePanel()">HIDE</button>
+            <button class="close-btn" onclick="Android.closeApp()">EXIT</button>
         </div>
     </div>
 
     <script>
-        let currentMultiplier = "2.15x";
-
-        function updatePrediction() {
-            // Stable generation based on time block so it doesn't flicker wildly every second
-            const randomVal = (Math.random() * (4.80 - 1.30) + 1.30).toFixed(2);
-            currentMultiplier = randomVal + "x";
-            document.getElementById("multiplierText").innerText = currentMultiplier;
-        }
-
-        function forceRefresh() {
-            document.getElementById("statusText").innerText = "SYNCING...";
-            setTimeout(() => {
-                updatePrediction();
-                document.getElementById("statusText").innerText = "SYSTEM SECURED 🟢";
-            }, 600);
-        }
-
-        // Update every 15 seconds so prediction remains stable and usable during gameplay
-        setInterval(updatePrediction, 15000);
-        updatePrediction();
-
-        function minimizeApp() {
-            if (window.Android && window.Android.minimizePanel) {
-                window.Android.minimizePanel();
+        function generatePrediction() {
+            // Generates a stable realistic Aviator flight multiplier between 1.20x and 5.80x
+            const randomVal = (Math.random() * (5.80 - 1.20) + 1.20).toFixed(2);
+            document.getElementById("prediction").innerText = randomVal + "x";
+            
+            // Color grading based on multiplier height
+            const predElement = document.getElementById("prediction");
+            if (parseFloat(randomVal) > 3.5) {
+                predElement.style.color = "#00ffcc"; // High neon cyan
+                predElement.style.textShadow = "0 0 15px rgba(0, 255, 204, 0.9)";
+            } else {
+                predElement.style.color = "#ff00ff"; // Pinkish magenta
+                predElement.style.textShadow = "0 0 15px rgba(255, 0, 255, 0.9)";
             }
         }
+
+        function triggerRefresh() {
+            document.getElementById("analytics-status").innerText = "Syncing Signal...";
+            document.getElementById("prediction").innerText = "...";
+            setTimeout(() => {
+                generatePrediction();
+                document.getElementById("analytics-status").innerText = "AI Model: Active";
+            }, 700);
+        }
+
+        // Auto refresh prediction every 12 seconds
+        setInterval(generatePrediction, 12000);
+        generatePrediction();
     </script>
 </body>
 </html>
