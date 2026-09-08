@@ -23,115 +23,171 @@ class FloatingService : Service() {
     private lateinit var bubbleView: TextView
     private lateinit var params: WindowManager.LayoutParams
     private lateinit var webView: WebView
+    private var isMinimized = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onCreate() {
         super.onCreate()
-        try {
-            windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-            container = FrameLayout(this)
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-            webView = WebView(this).apply {
-                setBackgroundColor(Color.TRANSPARENT)
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.mediaPlaybackRequiresUserGesture = false
-                addJavascriptInterface(WebAppInterface(), "Android")
-                layoutParams = FrameLayout.LayoutParams(420, 420)
-                loadUrl("file:///android_asset/index.html")
-            }
-            container.addView(webView)
+        container = FrameLayout(this).apply {
+            setBackgroundColor(Color.TRANSPARENT)
+        }
 
-            // Floating Bubble when minimized - clicking it restores the panel
-            bubbleView = TextView(this).apply {
-                text = "✈️"
-                setTextColor(Color.WHITE)
-                textSize = 26f
-                gravity = Gravity.CENTER
-                setBackgroundColor(Color.parseColor("#e60f172a"))
-                setPadding(28, 28, 28, 28)
-                visibility = View.GONE
-                
-                setOnClickListener {
-                    try {
-                        bubbleView.visibility = View.GONE
-                        container.visibility = View.VISIBLE
-                    } catch (e: Exception) {}
-                }
-            }
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.TRANSPARENT)
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.loadsImagesAutomatically = true
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            addJavascriptInterface(WebAppInterface(), "Android")
+            layoutParams = FrameLayout.LayoutParams(600, 600)
+            loadUrl("file:///android_asset/index.html")
+        }
+        container.addView(webView)
 
-            val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_PHONE
-            }
+        bubbleView = TextView(this).apply {
+            text = "✈️"
+            setTextColor(Color.WHITE)
+            textSize = 22f
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.parseColor("#cc000000"))
+            setPadding(20, 20, 20, 20)
+            visibility = View.GONE
+        }
 
-            params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                layoutFlag,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            ).apply {
-                gravity = Gravity.TOP or Gravity.START
-                x = 100
-                y = 200
-            }
+        val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
 
-            var initialX = 0
-            var initialY = 0
-            var initialTouchX = 0f
-            var initialTouchY = 0f
+        params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutFlag,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 100
+            y = 200
+        }
 
-            container.setOnTouchListener { _, event ->
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+
+        webView.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         initialX = params.x
                         initialY = params.y
                         initialTouchX = event.rawX
                         initialTouchY = event.rawY
-                        true
+                        return false
+                    }
+                }
+                return false
+            }
+        })
+
+        container.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(container, params)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        bubbleView.setOnTouchListener(object : View.OnTouchListener {
+            private var bX = 0
+            private var bY = 0
+            private var bTouchX = 0f
+            private var bTouchY = 0f
+            private var moved = false
+
+            override fun onTouch(v: View, event: MotionEvent): Boolean {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        bX = params.x
+                        bY = params.y
+                        bTouchX = event.rawX
+                        bTouchY = event.rawY
+                        moved = false
+                        return true
                     }
                     MotionEvent.ACTION_MOVE -> {
-                        params.x = initialX + (event.rawX - initialTouchX).toInt()
-                        params.y = initialY + (event.rawY - initialTouchY).toInt()
-                        try {
-                            windowManager.updateViewLayout(container, params)
-                        } catch (e: Exception) {}
-                        true
+                        val dx = (event.rawX - bTouchX).toInt()
+                        val dy = (event.rawY - bTouchY).toInt()
+                        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                            moved = true
+                            params.x = bX + dx
+                            params.y = bY + dy
+                            windowManager.updateViewLayout(bubbleView, params)
+                        }
+                        return true
                     }
-                    else -> false
+                    MotionEvent.ACTION_UP -> {
+                        if (!moved) expandPanel()
+                        return true
+                    }
                 }
+                return false
             }
+        })
 
-            windowManager.addView(container, params)
-            windowManager.addView(bubbleView, params)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        windowManager.addView(container, params)
+        windowManager.addView(bubbleView, params)
     }
 
     inner class WebAppInterface {
         @JavascriptInterface
         fun minimizePanel() {
             android.os.Handler(mainLooper).post {
-                try {
-                    container.visibility = View.GONE
-                    bubbleView.visibility = View.VISIBLE
-                } catch (e: Exception) {}
+                container.visibility = View.GONE
+                bubbleView.visibility = View.VISIBLE
+                isMinimized = true
+            }
+        }
+
+        @JavascriptInterface
+        fun closeApp() {
+            android.os.Handler(mainLooper).post {
+                stopSelf()
             }
         }
     }
 
+    private fun expandPanel() {
+        bubbleView.visibility = View.GONE
+        container.visibility = View.VISIBLE
+        isMinimized = false
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            if (::windowManager.isInitialized) {
-                if (::container.isInitialized) windowManager.removeView(container)
-                if (::bubbleView.isInitialized) windowManager.removeView(bubbleView)
-            }
-        } catch (e: Exception) {}
+        if (::container.isInitialized) {
+            try { windowManager.removeView(container) } catch (e: Exception) {}
+        }
+        if (::bubbleView.isInitialized) {
+            try { windowManager.removeView(bubbleView) } catch (e: Exception) {}
+        }
     }
 }
